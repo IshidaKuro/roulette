@@ -1,0 +1,107 @@
+﻿<Window x:Class="RouletteGame.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="American Roulette" Height="1022" Width="400">
+    <Window.Resources>
+        <!-- Styles for buttons -->
+        <Style x:Key="InsideBetButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <Style x:Key="ZeroButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="Green"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style x:Key="OutsideBetButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <!-- Define the grid -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 00 and 0 at the top -->
+        <Button Name="BetButton_00" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Content="00" Click="PlaceBet" Style="{StaticResource ZeroButtonStyle}"/>
+        <Button Name="BetButton_0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="0" Click="PlaceBet" Style="{StaticResource ZeroButtonStyle}"/>
+
+        <!-- Numbered grid (1-36) -->
+        <!-- Column 1 -->
+        <Button Name="BetButton_1" Grid.Row="2" Grid.Column="0" Content="1" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_4" Grid.Row="3" Grid.Column="0" Content="4" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_7" Grid.Row="4" Grid.Column="0" Content="7" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_10" Grid.Row="5" Grid.Column="0" Content="10" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_13" Grid.Row="6" Grid.Column="0" Content="13" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_16" Grid.Row="7" Grid.Column="0" Content="16" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_19" Grid.Row="8" Grid.Column="0" Content="19" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_22" Grid.Row="9" Grid.Column="0" Content="22" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_25" Grid.Row="10" Grid.Column="0" Content="25" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_28" Grid.Row="11" Grid.Column="0" Content="28" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_31" Grid.Row="12" Grid.Column="0" Content="31" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_34" Grid.Row="13" Grid.Column="0" Content="34" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+
+        <!-- Column 2 -->
+        <Button Name="BetButton_2" Grid.Row="2" Grid.Column="1" Content="2" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_5" Grid.Row="3" Grid.Column="1" Content="5" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_8" Grid.Row="4" Grid.Column="1" Content="8" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_11" Grid.Row="5" Grid.Column="1" Content="11" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_14" Grid.Row="6" Grid.Column="1" Content="14" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_17" Grid.Row="7" Grid.Column="1" Content="17" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_20" Grid.Row="8" Grid.Column="1" Content="20" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_23" Grid.Row="9" Grid.Column="1" Content="23" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_26" Grid.Row="10" Grid.Column="1" Content="26" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_29" Grid.Row="11" Grid.Column="1" Content="29" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_32" Grid.Row="12" Grid.Column="1" Content="32" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_35" Grid.Row="13" Grid.Column="1" Content="35" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+
+        <!-- Column 3 -->
+        <Button Name="BetButton_3" Grid.Row="2" Grid.Column="2" Content="3" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_6" Grid.Row="3" Grid.Column="2" Content="6" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_9" Grid.Row="4" Grid.Column="2" Content="9" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_12" Grid.Row="5" Grid.Column="2" Content="12" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_15" Grid.Row="6" Grid.Column="2" Content="15" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_18" Grid.Row="7" Grid.Column="2" Content="18" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_21" Grid.Row="8" Grid.Column="2" Content="21" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_24" Grid.Row="9" Grid.Column="2" Content="24" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_27" Grid.Row="10" Grid.Column="2" Content="27" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_30" Grid.Row="11" Grid.Column="2" Content="30" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_33" Grid.Row="12" Grid.Column="2" Content="33" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+        <Button Name="BetButton_36" Grid.Row="13" Grid.Column="2" Content="36" Click="PlaceBet" Style="{StaticResource InsideBetButtonStyle}"/>
+
+    </Grid>
+</Window>
