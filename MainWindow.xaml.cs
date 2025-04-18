@@ -62,8 +62,7 @@ namespace roulette
             InitializeComponent();
             chips = 1500;
             List<Button> hoverButtons = new List<Button> { Btn1, Btn2, Btn3, Btn4, Btn5, Btn6, Btn7, Btn8, Btn9, Btn10, Btn11, Btn12, Btn13, Btn14, Btn15, Btn16, Btn17, Btn18, Btn19, Btn20, Btn21, Btn22, Btn23, Btn24, Btn25, Btn26, Btn27, Btn28, Btn29, Btn30, Btn31, Btn32, Btn33, Btn34, Btn35, Btn36 };
-          
-
+                        
         }
 
 
@@ -91,12 +90,9 @@ namespace roulette
         {
             bool even = input % 2 == 0;
 
-
             string result = input.ToString();
 
             result  += ", " + GetRouletteColour(input);
-
-
 
             return result;
         }
@@ -217,7 +213,6 @@ namespace roulette
         public void SplitBetClicked(object sender, RoutedEventArgs e)
         {
 
-
         }
 
         
@@ -230,44 +225,64 @@ namespace roulette
         //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
         private void Line_Bet_Button_Click(object sender, RoutedEventArgs e)
         {
-            //add a hover handler to each button
-          
-            foreach (var btn in hoverButtons)
-            {
-                // Detach first to avoid duplicate handlers if clicked multiple times
-                btn.MouseEnter -= Button_MouseEnter;
-                btn.MouseLeave -= Button_MouseLeave;
-
-                // Attach hover event handlers
-                btn.MouseEnter += Button_MouseEnter;
-                btn.MouseLeave += Button_MouseLeave;
-            }
+        
         }
 
-        private void Button_MouseEnter(object sender, EventArgs e)
+        private void btnPlaceBet_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn)
+            int betAmount = int.Parse(txtBetAmount.Text);
+            if(!Bets.TryAdd(txtBet.Text, betAmount))
             {
-                btn.Background = Brushes.LightSkyBlue; // Highlight color
+                Bets[txtBet.Text] += betAmount;
                 
             }
-        }
 
-        private void Button_MouseLeave(object sender, EventArgs e)
-        {
-            if (sender is Button btn)
+            lstBet.Items.Clear();
+            foreach (var bet in Bets)
             {
-                int number =int.Parse(btn.Content.ToString());
-                if(reds.Contains(number))
-                {
-                    btn.Background = Brushes.Red;
-                }
-                else
-                {
-                    btn.Background = Brushes.Black;
-                }
+                lstBet.Items.Add(bet.Key + "    : " + bet.Value + " chips");
             }
         }
+
+
+        //    //add a hover handler to each button
+
+        //    foreach (var btn in hoverButtons)
+        //    {
+        //        // Detach first to avoid duplicate handlers if clicked multiple times
+        //        btn.MouseEnter -= Button_MouseEnter;
+        //        btn.MouseLeave -= Button_MouseLeave;
+
+        //        // Attach hover event handlers
+        //        btn.MouseEnter += Button_MouseEnter;
+        //        btn.MouseLeave += Button_MouseLeave;
+        //    }
+        //}
+
+        //private void Button_MouseEnter(object sender, EventArgs e)
+        //{
+        //    if (sender is Button btn)
+        //    {
+        //        btn.Background = Brushes.LightSkyBlue; // Highlight color
+
+        //    }
+        //}
+
+        //private void Button_MouseLeave(object sender, EventArgs e)
+        //{
+        //    if (sender is Button btn)
+        //    {
+        //        int number =int.Parse(btn.Content.ToString());
+        //        if(reds.Contains(number))
+        //        {
+        //            btn.Background = Brushes.Red;
+        //        }
+        //        else
+        //        {
+        //            btn.Background = Brushes.Black;
+        //        }
+        //    }
+        //}
 
 
 
