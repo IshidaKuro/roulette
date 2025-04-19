@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,7 +15,9 @@ using System.Windows.Shapes;
 
 ///<Todo>
 /// 
-///     create a window for the betting UI
+///     
+///     Add column bet button functionality
+///     let the user remove their bet
 ///     
 ///     
 ///</Todo>
@@ -39,10 +42,10 @@ namespace roulette
         static int[] reds = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
 
         //bets that are 50/50 shots - payout 1-1, so £1 of winnings and £1 for the initial ante
-        static string[] doublepayoutbets = { "Red", "Black", "Even", "Odd", "First Half" ,"Second Half" };
+        static string[] doublepayoutbets = { "RED", "BLACK", "EVEN", "ODD", "1 to 18" , "19 to 36" };
 
         //bets that payout 2-1, so return triple when you win
-        static string[] triplepayoutbets = { "First Column", "Second Column","Third Column", "First Dozen", "Second Dozen","Third Dozen"};
+        static string[] triplepayoutbets = { "First Column", "Second Column","Third Column", "1st 12", "2nd 12","3rd 12"};
 
 
         
@@ -62,7 +65,7 @@ namespace roulette
             InitializeComponent();
             chips = 1500;
             List<Button> hoverButtons = new List<Button> { Btn1, Btn2, Btn3, Btn4, Btn5, Btn6, Btn7, Btn8, Btn9, Btn10, Btn11, Btn12, Btn13, Btn14, Btn15, Btn16, Btn17, Btn18, Btn19, Btn20, Btn21, Btn22, Btn23, Btn24, Btn25, Btn26, Btn27, Btn28, Btn29, Btn30, Btn31, Btn32, Btn33, Btn34, Btn35, Btn36 };
-                        
+            lblBalance.Content = "Player Balance: " + chips;       
         }
 
 
@@ -228,21 +231,74 @@ namespace roulette
         
         }
 
+        //function is called when the place bet button is pressed
         private void btnPlaceBet_Click(object sender, RoutedEventArgs e)
         {
+            
+            //make sure we're actually betting on something
+            if(txtBet.Text == "")
+            {
+                MessageBox.Show("You must bet on something");
+                return;
+            }
+
+            //ensure that a bet is being placed
+            if (txtBetAmount.Text == "")
+            {
+                MessageBox.Show("You must bet at least 1 chip");
+                return;
+            }
+
+
             int betAmount = int.Parse(txtBetAmount.Text);
-            if(!Bets.TryAdd(txtBet.Text, betAmount))
+
+            //if the player doesn't have enough chips to place the bet, display a message and don't add the bet
+            if (betAmount > chips) 
+            {
+                MessageBox.Show("You don't have enough chips to make this bet");
+                return;
+
+            }
+           
+            
+            //add the bet to the list, if we can't add it, update the value for the appropriate bet
+            if (!Bets.TryAdd(txtBet.Text, betAmount))
             {
                 Bets[txtBet.Text] += betAmount;
                 
             }
 
+            //subtract the chips from the player's wallet
+            chips-=betAmount;
+
+            //refresh the UI
             lstBet.Items.Clear();
+            lblBalance.Content = "Player Balance:    " + chips;
             foreach (var bet in Bets)
             {
-                lstBet.Items.Add(bet.Key + "    : " + bet.Value + " chips");
+                lstBet.Items.Add(bet.Key + "    :   " + bet.Value + " chips");
+            }
+
+
+        }
+
+
+        //delete any non numeric characters from the betting text box as they are added
+        private void txtBetAmount_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            if (!string.IsNullOrEmpty(textBox.Text) && !Regex.IsMatch(textBox.Text, "^[0-9]+$"))
+            {
+                // Remove invalid characters
+                textBox.Text = new string(textBox.Text.Where(char.IsDigit).ToArray());
+                textBox.CaretIndex = textBox.Text.Length;
+
             }
         }
+
+
+
+
 
 
         //    //add a hover handler to each button
