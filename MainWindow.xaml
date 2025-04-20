@@ -54,13 +54,13 @@
         <Button x:Name="First_Column_Bet_Button" Content="2 to 1" Width="70" Height="60" Canvas.Left="947" Canvas.Top="191" Background="Gray" Foreground="White"/>
 
         <!-- Side bets -->
-        
+
         <!-- Dozen Buttons-->
 
         <Button x:Name="First_Dozen_Bet_Button" Content="1st 12" Width="270" Height="50" Canvas.Left="107" Canvas.Top="271" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
         <Button x:Name="Second_Dozen_Bet_Button" Content="2nd 12" Width="265" Height="50" Canvas.Left="392" Canvas.Top="271" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
         <Button x:Name="Third_Dozen_Button" Content="3rd 12" Width="270" Height="50" Canvas.Left="667" Canvas.Top="271" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
-       
+
         <!-- Bottom Row -->
         <Button x:Name="First_Half_Bet_Button" Content="1 to 18" Width="130" Height="50" Canvas.Left="107" Canvas.Top="341" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
         <Button x:Name="Even_Bet_Button" Content="EVEN" Width="130" Height="50" Canvas.Left="247" Canvas.Top="341" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click ="NumberButtonClicked"/>
@@ -69,25 +69,28 @@
         <Button x:Name="Odd_Bet_Button" Content="ODD" Width="130" Height="50" Canvas.Left="667" Canvas.Top="341" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
         <Button x:Name="Second_Half_Bet_Button" Content="19 to 36" Width="130" Height="50" Canvas.Left="807" Canvas.Top="341" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
 
-        
+
         <!--Other types of bet -->
         <Button x:Name="First_Five_Button" Content="First Five" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="51" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button x:Name="Split_Bet_Button" Content="Split Bet (2 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="116" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button x:Name="Street_Bet_Button" Content="Street Bet (3 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="181" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button x:Name="Croner_Bet_Button" Content="Corner Bet (4 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="246" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button x:Name="Line_Bet_Button" Content="Line Bet (6 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="301" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Line_Bet_Button_Click"/>
-        
+
         <!-- Bottom text panel -->
         <Label Content="Betting" Canvas.Left="303" Canvas.Top="485" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Width="102" Height="50" FontSize="22"/>
         <TextBox x:Name ="txtBetAmount"  Height="50" Canvas.Left="392" TextWrapping="Wrap" Canvas.Top="482" Width="137" HorizontalAlignment="Left" VerticalAlignment="Top" Background="DarkGreen" Foreground="White" TextChanged="txtBetAmount_TextChanged" MaxLength="7"/>
         <Label Content="chips on" Canvas.Left="548" Canvas.Top="484" Foreground="White" HorizontalAlignment="Left" Height="46" VerticalAlignment="Center" Width="103" FontSize="22"/>
         <TextBox x:Name="txtBet" Height="50" Canvas.Left="646" TextWrapping="Wrap" Canvas.Top="482" Width="137" HorizontalAlignment="Left" VerticalAlignment="Top" Background="DarkGreen" Foreground="White"/>
         <Button x:Name="btnPlaceBet" Content="Place Bet" Width="130" Height="50" Canvas.Left="827" Canvas.Top="484" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btnPlaceBet_Click"/>
-        
-        
+
+
         <ListBox x:Name ="lstBet" Height="257" Canvas.Left="1257" Canvas.Top="76" Width="260" HorizontalAlignment="Center" VerticalAlignment="Top" Background="DarkGreen" Foreground="White"/>
         <Label Content="Placed Bets" Canvas.Left="1257" Canvas.Top="51" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <Label x:Name="lblBalance" Content="Player Balance: " Foreground="white" Canvas.Left="78" Canvas.Top="447"/>
+        <Button x:Name="btnSpin" Content="Spin" Width="130" Height="50" Canvas.Left="1265" Canvas.Top="485" Background="Gray" Foreground="White" Click="Spin_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtNumberOutput"  Canvas.Left="1281" TextWrapping="Wrap" Text="" Canvas.Top="388" Width="120" HorizontalAlignment="Left" Height="55" VerticalAlignment="Top" Background="DarkGreen" Foreground="White" FontSize="32"/>
+        <Label Content="Winning Number" Canvas.Left="1290" Canvas.Top="357" Foreground="White"/>
 
     </Canvas>
 </Window>

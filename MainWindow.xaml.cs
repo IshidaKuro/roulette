@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -14,12 +15,16 @@ using System.Windows.Shapes;
 
 
 ///<Todo>
-/// 
-///     
-///     Add column bet button functionality
+///      
 ///     let the user remove their bet
 ///     
-///     
+///     add functionality for:
+///         Column bet buttons
+///         Betting on 2 numbers
+///         Betting on 3 numbers
+///         Betting on 4 Numbers
+///         Betting on 6 Numbers
+///         
 ///</Todo>
 
 namespace roulette
@@ -47,7 +52,6 @@ namespace roulette
         //bets that payout 2-1, so return triple when you win
         static string[] triplepayoutbets = { "First Column", "Second Column","Third Column", "1st 12", "2nd 12","3rd 12"};
 
-
         
         //the number of chips that the player has
         int chips = 0;
@@ -72,32 +76,70 @@ namespace roulette
 
         private void Spin_Click(object sender, RoutedEventArgs e)
         {
-            winningBets = "";
-            //figure out what the result is going to be
-            short result = (short)rng.Next(-1,36);
+            //randomly generate the winning number
+            int winningNumber = rng.Next(-1,36);
             
-           
+            if(winningNumber == -1)
+            {
+                txtNumberOutput.Text = "00";
+            }
+            txtNumberOutput.Text = winningNumber.ToString();
 
+
+            winningBets = CalculateWinningBets(winningNumber);
+            PayoutBets();
+
+            //update the UI
+            Bets.Clear();
+            refreshUI();
         }
 
 
         public string GetRouletteColour(int input)
         {
-            if (input <= 0) { return "Green"; }
-            else if (reds.Contains(input)) { return "Red"; }
-            else { return "Black"; }      
+            if (input <= 0) { return ""; }
+            else if (reds.Contains(input)) { return "RED"; }
+            else { return "BLACK"; }      
             
         }
 
-       public string CalculateWinningBets(short input)
+       public string CalculateWinningBets(int input)
         {
-            bool even = input % 2 == 0;
 
+            //number
             string result = input.ToString();
 
+
+            //colour
             result  += ", " + GetRouletteColour(input);
 
+            if(input < 5)
+            {
+                result += ", First Five";
+            }
+
+            //if the number is not 0 or 00
+            if (input > 0)
+            {
+                //even or odd
+                if (input % 2 == 0) { result += ", EVEN"; } else { result += ", ODD"; }
+
+                //top or bottom half
+                if(input > 18) { result += ", 19 to 36"; } else { result += ", 1 to 18"; }
+                
+                //column
+
+
+
+                //dozens
+                if (input > 23) { result += ", 3rd 12"; } else if (input < 13 && input > 0) { result += ", 1st 12"; } else { result += ", 2nd 12"; }
+            }
+
+            Debug.WriteLine(result);
+            
+
             return result;
+
         }
 
         //function that returns which column and dozen that the result is contained within
@@ -133,22 +175,17 @@ namespace roulette
         public void PayoutBets()
         {
             int winnings = 0;
-         
-         
 
             foreach(KeyValuePair<string, int> d in Bets)
             {
                 //if there is a bet on and it is contained in the winning string combination
                 if (winningBets.Contains(d.Key))
                 {
-
-
                     //if we hit a number - pays 35 to 1 - £1 bet returns £36 including initial bet
                     if (int.TryParse(d.Key, out _))
                     {
                         winnings += d.Value * 36;
-                    }
-                    
+                    }                    
                     //first five - 00, 0, 1, 2, 3 - payout 7x
                     else if (d.Key.Equals("First Five"))
                     {
@@ -194,8 +231,15 @@ namespace roulette
                 }
             }
 
-            chips=+ winnings;
-        }
+            //let the user know how much they have won, encourage them to try again if they lose
+            if (winnings > 0)
+            { MessageBox.Show("Congratulations, you won " + winnings + " chips!!"); }
+            else
+            { MessageBox.Show("You didn't win anything, better luck next time."); }
+
+
+                chips += winnings;
+            }
 
 
 
@@ -214,13 +258,6 @@ namespace roulette
 
         //split bets -- allow the user to click on the first number, and then only allow them to click on adjacent numbers
         public void SplitBetClicked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        
-
-        private void Btn1_Click(object sender, RoutedEventArgs e)
         {
 
         }
@@ -272,14 +309,20 @@ namespace roulette
             chips-=betAmount;
 
             //refresh the UI
+            refreshUI();
+
+        }
+
+
+        //function to update the UI of the game when we either place a bet, remove a bet, or complete a round
+        public void refreshUI()
+        {
             lstBet.Items.Clear();
             lblBalance.Content = "Player Balance:    " + chips;
             foreach (var bet in Bets)
             {
                 lstBet.Items.Add(bet.Key + "    :   " + bet.Value + " chips");
             }
-
-
         }
 
 
@@ -295,10 +338,6 @@ namespace roulette
 
             }
         }
-
-
-
-
 
 
         //    //add a hover handler to each button
