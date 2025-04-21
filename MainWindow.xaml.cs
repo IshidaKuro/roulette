@@ -16,7 +16,6 @@ using System.Windows.Shapes;
 
 ///<Todo>
 ///      
-///     let the user remove their bet
 ///     
 ///     add functionality for:
 ///         Betting on 2 numbers
@@ -379,6 +378,27 @@ namespace roulette
 
             }
         }
+
+
+        //function that suppports removing bets from the bet list, this function is called whenever the user presses the delete button to the side of each entry
+
+        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            // Get the item associated with this button
+            if (sender is Button btn && btn.DataContext is string item)
+            {
+                //clean up the list item so we can find the bet in the dictionary
+                item = item.Substring(0, item.IndexOf(":")).Trim(); //the key is before the colon in the list box string, trim is called to remove whitespace from the key we are looking for
+                
+
+                Debug.WriteLine("Removing "+ item + " from the bet list.");
+                Bets.TryGetValue(item, out int refund); //get the amount of chips in the bet
+                chips += refund; //add them to the number of chips that the player has
+                Bets.Remove(item); //remove the item from the list
+            }
+            refreshUI();
+        }
+
 
 
         //    //add a hover handler to each button

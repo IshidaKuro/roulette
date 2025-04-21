@@ -85,7 +85,20 @@
         <Button x:Name="btnPlaceBet" Content="Place Bet" Width="130" Height="50" Canvas.Left="827" Canvas.Top="484" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btnPlaceBet_Click"/>
 
 
-        <ListBox x:Name ="lstBet" Height="257" Canvas.Left="1257" Canvas.Top="76" Width="260" HorizontalAlignment="Center" VerticalAlignment="Top" Background="DarkGreen" Foreground="White"/>
+        <ListBox x:Name ="lstBet" Height="257" Canvas.Left="1257" Canvas.Top="76" Width="260" HorizontalAlignment="Center" VerticalAlignment="Top" Background="DarkGreen" Foreground="White">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                        <Button Content="X" 
+                        Margin="10,0,0,0" 
+                        Click="DeleteItem_Click" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+
         <Label Content="Placed Bets" Canvas.Left="1257" Canvas.Top="51" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <Label x:Name="lblBalance" Content="Player Balance: " Foreground="white" Canvas.Left="78" Canvas.Top="447"/>
         <Button x:Name="btnSpin" Content="Spin" Width="130" Height="50" Canvas.Left="1265" Canvas.Top="485" Background="Gray" Foreground="White" Click="Spin_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
