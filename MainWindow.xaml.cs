@@ -19,7 +19,6 @@ using System.Windows.Shapes;
 ///     let the user remove their bet
 ///     
 ///     add functionality for:
-///         Column bet buttons
 ///         Betting on 2 numbers
 ///         Betting on 3 numbers
 ///         Betting on 4 Numbers
@@ -50,7 +49,7 @@ namespace roulette
         static string[] doublepayoutbets = { "RED", "BLACK", "EVEN", "ODD", "1 to 18" , "19 to 36" };
 
         //bets that payout 2-1, so return triple when you win
-        static string[] triplepayoutbets = { "First Column", "Second Column","Third Column", "1st 12", "2nd 12","3rd 12"};
+        static string[] triplepayoutbets = { "1st Column", "2nd Column","3rd Column", "1st 12", "2nd 12","3rd 12"};
 
         
         //the number of chips that the player has
@@ -79,10 +78,38 @@ namespace roulette
             //randomly generate the winning number
             int winningNumber = rng.Next(-1,36);
             
+
+            //display the winning number
+
+            //reformat -1 to 00
             if(winningNumber == -1)
             {
                 txtNumberOutput.Text = "00";
             }
+
+            //set appropritate background and text colours
+            if (winningNumber > 0)
+            {
+                if (reds.Contains(winningNumber))
+                {
+                    txtNumberOutput.Foreground = new SolidColorBrush(Colors.Black);
+                    txtNumberOutput.Background = new SolidColorBrush(Colors.Red);
+                }
+                else
+                {
+                    txtNumberOutput.Foreground = new SolidColorBrush(Colors.White);
+                    txtNumberOutput.Background = new SolidColorBrush(Colors.Black);
+                }
+
+            }
+            else
+            {
+                txtNumberOutput.Foreground = new SolidColorBrush(Colors.White);
+                txtNumberOutput.Background = new SolidColorBrush(Colors.ForestGreen);
+            }
+            
+
+            //update number in text box
             txtNumberOutput.Text = winningNumber.ToString();
 
 
@@ -128,7 +155,21 @@ namespace roulette
                 if(input > 18) { result += ", 19 to 36"; } else { result += ", 1 to 18"; }
                 
                 //column
+                int s = input %3 ;
 
+                
+                if (s == 1) //first column
+                {
+                    result += ", 1st Column";
+                }                              
+                else if (s == 2) //second column
+                {
+                    result += ", 2nd Column";
+                }                
+                else if (s == 0) //third column
+                {
+                    result += ", 3rd Column";
+                }
 
 
                 //dozens

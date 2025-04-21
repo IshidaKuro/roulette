@@ -21,7 +21,7 @@
         <Button x:Name="Btn30" Content="30" Width="60" Height="60" Canvas.Left="737" Canvas.Top="51" Background="Red" Foreground="White" Click="NumberButtonClicked"/>
         <Button x:Name="Btn33" Content="33" Width="60" Height="60" Canvas.Left="807" Canvas.Top="51" Background="Black" Foreground="White" Click="NumberButtonClicked"/>
         <Button x:Name="Btn36" Content="36" Width="60" Height="60" Canvas.Left="877" Canvas.Top="51" Background="Red" Foreground="White" Click="NumberButtonClicked"/>
-        <Button x:Name="Third_Column_Bet_Button" Content="2 to 1" Width="70" Height="60" Canvas.Left="947" Canvas.Top="51" Background="Gray" Foreground="White"/>
+        <Button x:Name="Third_Column_Bet_Button" Content="3rd Column" Width="70" Height="60" Canvas.Left="947" Canvas.Top="51" Background="Gray" Foreground="White" Click="NumberButtonClicked" />
 
         <!-- Middle row of numbers -->
         <Button x:Name="Btn2" Content="2" Width="60" Height="60" Canvas.Left="107" Canvas.Top="121" Background="Black" Foreground="White" Click="NumberButtonClicked"/>
@@ -36,7 +36,7 @@
         <Button x:Name="Btn29" Content="29" Width="60" Height="60" Canvas.Left="737" Canvas.Top="121" Background="Black" Foreground="White" Click="NumberButtonClicked"/>
         <Button x:Name="Btn32" Content="32" Width="60" Height="60" Canvas.Left="807" Canvas.Top="121" Background="Red" Foreground="White" Click="NumberButtonClicked"/>
         <Button x:Name="Btn35" Content="35" Width="60" Height="60" Canvas.Left="877" Canvas.Top="121" Background="Black" Foreground="White" Click="NumberButtonClicked"/>
-        <Button x:Name="Second_Column_Bet_Button" Content="2 to 1" Width="70" Height="60" Canvas.Left="947" Canvas.Top="121" Background="Gray" Foreground="White" />
+        <Button x:Name="Second_Column_Bet_Button" Content="2nd Column" Width="70" Height="60" Canvas.Left="947" Canvas.Top="121" Background="Gray" Foreground="White" Click="NumberButtonClicked" />
 
         <!-- Bottom row of numbers -->
         <Button x:Name="Btn1" Content="1" Width="60" Height="60" Canvas.Left="107" Canvas.Top="191" Background="Red" Foreground="White" Click="NumberButtonClicked"/>
@@ -51,7 +51,7 @@
         <Button x:Name="Btn28" Content="28" Width="60" Height="60" Canvas.Left="737" Canvas.Top="191" Background="Black" Foreground="White" Click="NumberButtonClicked"/>
         <Button x:Name="Btn31" Content="31" Width="60" Height="60" Canvas.Left="807" Canvas.Top="191" Background="Black" Foreground="White" Click="NumberButtonClicked"/>
         <Button x:Name="Btn34" Content="34" Width="60" Height="60" Canvas.Left="877" Canvas.Top="191" Background="Red" Foreground="White" Click="NumberButtonClicked"/>
-        <Button x:Name="First_Column_Bet_Button" Content="2 to 1" Width="70" Height="60" Canvas.Left="947" Canvas.Top="191" Background="Gray" Foreground="White"/>
+        <Button x:Name="First_Column_Bet_Button" Content="1st Column" Width="70" Height="60" Canvas.Left="947" Canvas.Top="191" Background="Gray" Foreground="White" Click="NumberButtonClicked"/>
 
         <!-- Side bets -->
 
