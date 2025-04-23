@@ -85,6 +85,10 @@ namespace roulette
             {
                 txtNumberOutput.Text = "00";
             }
+            else
+            {
+                txtNumberOutput.Text = winningNumber.ToString();
+            }
 
             //set appropritate background and text colours
             if (winningNumber > 0)
@@ -108,8 +112,6 @@ namespace roulette
             }
             
 
-            //update number in text box
-            txtNumberOutput.Text = winningNumber.ToString();
 
 
             winningBets = CalculateWinningBets(winningNumber);
@@ -121,25 +123,25 @@ namespace roulette
         }
 
 
-        public string GetRouletteColour(int input)
-        {
-            if (input <= 0) { return ""; }
-            else if (reds.Contains(input)) { return "RED"; }
-            else { return "BLACK"; }      
-            
-        }
-
        public string CalculateWinningBets(int input)
         {
 
             //number
-            string result = input.ToString();
+            string result = "";
+            
 
-
-            //colour
-            result  += ", " + GetRouletteColour(input);
-
-            if(input < 5)
+            //format -1 as 00
+            if (input ==-1)
+            {
+                result = "00";
+            }
+            else
+            {
+                result = input.ToString();
+            }        
+            
+            //first five, the first five values are 00, 0, 1, 2 and 3
+            if(input < 4)
             {
                 result += ", First Five";
             }
@@ -147,6 +149,16 @@ namespace roulette
             //if the number is not 0 or 00
             if (input > 0)
             {
+                //colour
+                if (reds.Contains(input))
+                {
+                    result += ", RED";
+                }
+                else
+                { 
+                    result += ", BLACK";
+                }
+
                 //even or odd
                 if (input % 2 == 0) { result += ", EVEN"; } else { result += ", ODD"; }
 
