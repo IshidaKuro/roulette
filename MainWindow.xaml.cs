@@ -122,14 +122,16 @@ namespace roulette
             refreshUI();
         }
 
-
+        /// <summary>
+        /// This method returns a string of the bets that have won separated by a comma eg. "21, RED, ODD...etc."
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
        public string CalculateWinningBets(int input)
         {
-
             //number
             string result = "";
             
-
             //format -1 as 00
             if (input ==-1)
             {
@@ -211,8 +213,7 @@ namespace roulette
 
             
 
-            //determine which dozen the number is in
-            
+            //determine which dozen the number is is
             
                 result += ", ";
 
@@ -228,6 +229,7 @@ namespace roulette
         {
             int winnings = 0;
 
+            //for each bet on the list
             foreach(KeyValuePair<string, int> d in Bets)
             {
                 //if there is a bet on and it is contained in the winning string combination
@@ -265,7 +267,7 @@ namespace roulette
                     //three numbers - street bets - payout 12x
                     else if (d.Key.Contains("Street"))
                     {
-                        winnings+=d.Value *12;
+                        winnings+=d.Value * 12;
                     }
 
 
@@ -311,13 +313,42 @@ namespace roulette
         //split bets -- allow the user to click on the first number, and then only allow them to click on adjacent numbers
         public void SplitBetClicked(object sender, RoutedEventArgs e)
         {
+            //create the string that we are going to use to place the bet
+            string splitBet = "SPLIT (";
+
+
+            //if the user clicks the split bet button again, cancel the bet
+
+            //highlight the valid numbers that a user can bet on when they hover over their first number selection
+
+            //when the user selects their first number, disable all the invalid bets
+
+            //add the first number to the bet
+
+            //wait for them to click on the second number before adding it to the bet string
+            
+
+            //close the bet string, and return the bet we are placing
+            splitBet += ")";
+            txtBet.Text = splitBet;
+            
+
 
         }
 
         //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
         private void Line_Bet_Button_Click(object sender, RoutedEventArgs e)
         {
-        
+
+            //if the user clicks the line bet button again, exit the mode
+
+
+            //after this button is clicked, highlight the column that the user is hovering over and the column to the right
+            //if the user is hovering over the rightmost column, only highlight the two rightmost columns
+
+            //when the user clicks, create a line bet with the highlighted numbers
+
+
         }
 
         //function is called when the place bet button is pressed
