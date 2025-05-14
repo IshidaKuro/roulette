@@ -125,11 +125,7 @@ namespace roulette
         }
 
         /// <summary>
-<<<<<<< Updated upstream
         /// This method returns a string of the bets that have won separated by a comma eg. "21, RED, ODD...etc."
-=======
-        /// function that determines the winning bets based on the number that has been generated
->>>>>>> Stashed changes
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
