@@ -16,7 +16,6 @@ using System.Windows.Shapes;
 
 ///<Todo>
 ///      
-///     
 ///     add functionality for:
 ///         Betting on 2 numbers
 ///         Betting on 3 numbers
@@ -55,23 +54,26 @@ namespace roulette
         int chips = 0;
 
         string winningBets = "";
-        //  dozens
-        //  rows
-        //  colours
-        //  odd / even
-        //  columns
-
+        
 
         public MainWindow()
         {
             InitializeComponent();
+            //initialize the player's chips when the main window is created
             chips = 1500;
+
             List<Button> hoverButtons = new List<Button> { Btn1, Btn2, Btn3, Btn4, Btn5, Btn6, Btn7, Btn8, Btn9, Btn10, Btn11, Btn12, Btn13, Btn14, Btn15, Btn16, Btn17, Btn18, Btn19, Btn20, Btn21, Btn22, Btn23, Btn24, Btn25, Btn26, Btn27, Btn28, Btn29, Btn30, Btn31, Btn32, Btn33, Btn34, Btn35, Btn36 };
+
+            //set the player's chip balance in the UI
             lblBalance.Content = "Player Balance: " + chips;       
         }
 
 
-
+        /// <summary>
+        /// function that is called when the "Spin" button has been clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Spin_Click(object sender, RoutedEventArgs e)
         {
             //randomly generate the winning number
@@ -123,7 +125,11 @@ namespace roulette
         }
 
         /// <summary>
+<<<<<<< Updated upstream
         /// This method returns a string of the bets that have won separated by a comma eg. "21, RED, ODD...etc."
+=======
+        /// function that determines the winning bets based on the number that has been generated
+>>>>>>> Stashed changes
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -225,6 +231,10 @@ namespace roulette
                 return result;
         }
 
+
+        /// <summary>
+        /// function that cycles through the bets made and pays out if the bet has won
+        /// </summary>
         public void PayoutBets()
         {
             int winnings = 0;
@@ -236,6 +246,7 @@ namespace roulette
                 if (winningBets.Contains(d.Key))
                 {
                     //if we hit a number - pays 35 to 1 - £1 bet returns £36 including initial bet
+                    //parse to int so that we don't pay out 36x to any area bets
                     if (int.TryParse(d.Key, out _))
                     {
                         winnings += d.Value * 36;
@@ -258,27 +269,26 @@ namespace roulette
                         winnings += d.Value * 3;
                     }
 
-
                     //split bets - two numbers - payout 18x
-                    else if (d.Key.Contains("Split") && d.Key.Contains(winningBets.Substring(0, 2)))
+                    else if (d.Key.Contains("SPLIT") && d.Key.Contains(winningBets.Substring(0, 2)))
                     {
                         winnings += d.Value * 18;
                     }
+                    
                     //three numbers - street bets - payout 12x
-                    else if (d.Key.Contains("Street"))
+                    else if (d.Key.Contains("STREET"))
                     {
                         winnings+=d.Value * 12;
                     }
-
-
+                    
                     //four numbers - corner bet - payout 9x
-                    else if (d.Key.Contains("Corner"))
+                    else if (d.Key.Contains("CORNER"))
                     {
                         winnings += d.Value * 9;
                     }
                 
                     //six number bets - line bets - payout 6x
-                    else if (d.Key.Contains("Line"))
+                    else if (d.Key.Contains("LINE"))
                     {
                         winnings += d.Value * 6;
                     }
@@ -291,10 +301,8 @@ namespace roulette
             else
             { MessageBox.Show("You didn't win anything, better luck next time."); }
 
-
-                chips += winnings;
-            }
-
+            chips += winnings;
+        }
 
 
         //------------BETTING FUNCTIONS------------
@@ -311,6 +319,7 @@ namespace roulette
         }
 
         //split bets -- allow the user to click on the first number, and then only allow them to click on adjacent numbers
+        //also being worked on in desktop build
         public void SplitBetClicked(object sender, RoutedEventArgs e)
         {
             //create the string that we are going to use to place the bet
@@ -337,6 +346,7 @@ namespace roulette
         }
 
         //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
+        //this function is being created on desktop
         private void Line_Bet_Button_Click(object sender, RoutedEventArgs e)
         {
 
@@ -353,12 +363,11 @@ namespace roulette
 
         //function is called when the place bet button is pressed
         private void btnPlaceBet_Click(object sender, RoutedEventArgs e)
-        {
-            
+        {            
             //make sure we're actually betting on something
             if(txtBet.Text == "")
             {
-                MessageBox.Show("You must bet on something");
+                MessageBox.Show("You must choose something to place a bet on first");
                 return;
             }
 
@@ -369,7 +378,6 @@ namespace roulette
                 return;
             }
 
-
             int betAmount = int.Parse(txtBetAmount.Text);
 
             //if the player doesn't have enough chips to place the bet, display a message and don't add the bet
@@ -378,22 +386,16 @@ namespace roulette
                 MessageBox.Show("You don't have enough chips to make this bet");
                 return;
 
-            }
-           
+            }           
             
             //add the bet to the list, if we can't add it, update the value for the appropriate bet
-            if (!Bets.TryAdd(txtBet.Text, betAmount))
-            {
-                Bets[txtBet.Text] += betAmount;
-                
-            }
+            if (!Bets.TryAdd(txtBet.Text, betAmount)) {Bets[txtBet.Text] += betAmount;}
 
             //subtract the chips from the player's wallet
             chips-=betAmount;
 
             //refresh the UI
             refreshUI();
-
         }
 
 
@@ -482,8 +484,5 @@ namespace roulette
         //        }
         //    }
         //}
-
-
-
     }
 }
