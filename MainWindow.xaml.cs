@@ -14,15 +14,17 @@ using System.Windows.Shapes;
 
 
 
-///<Todo>
-///      
-///     add functionality for:
-///         Betting on 2 numbers
+///<To-Do>
+///
+/// disable buttons that are not adjacent to the first button that was clicked for a split bet - right now we can bet on 13 and 36 in a split bet
+///     
+/// add functionality for:
+/// 
 ///         Betting on 3 numbers
 ///         Betting on 4 Numbers
 ///         Betting on 6 Numbers
 ///         
-///</Todo>
+///</To-Do>
 
 namespace roulette
 {
@@ -33,6 +35,11 @@ namespace roulette
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        bool reroll = false; //flag to determine if we're rolling again with the same bets 
+        //the number of chips that the player has
+        int chips = 0;
+        string winningBets = "";
 
         //random number generator
         Random rng = new Random();
@@ -48,13 +55,15 @@ namespace roulette
 
         //bets that payout 2-1, so return triple when you win
         static string[] triplepayoutbets = { "1st Column", "2nd Column","3rd Column", "1st 12", "2nd 12","3rd 12"};
+                
+        //flags and variables for split bets
+        bool splitBetBeingPlaced = false;       
+        bool waitingForSecondClick = false;
 
-        
-        //the number of chips that the player has
-        int chips = 0;
+        int firstButton = -2;
 
-        string winningBets = "";
-        
+        //we want to have a list of all the buttons, this is so we can disable buttons
+
 
         public MainWindow()
         {
@@ -227,7 +236,6 @@ namespace roulette
                 return result;
         }
 
-
         /// <summary>
         /// function that cycles through the bets made and pays out if the bet has won
         /// </summary>
@@ -238,7 +246,7 @@ namespace roulette
             //for each bet on the list
             foreach(KeyValuePair<string, int> d in Bets)
             {
-                //if there is a bet on and it is contained in the winning string combination
+                //d.Key = the bet placed in the Bets Dict
                 if (winningBets.Contains(d.Key))
                 {
                     //if we hit a number - pays 35 to 1 - £1 bet returns £36 including initial bet
@@ -265,41 +273,58 @@ namespace roulette
                         winnings += d.Value * 3;
                     }
 
-                    //split bets - two numbers - payout 18x
-                    else if (d.Key.Contains("SPLIT") && d.Key.Contains(winningBets.Substring(0, 2)))
-                    {
-                        winnings += d.Value * 18;
-                    }
-                    
-                    //three numbers - street bets - payout 12x
-                    else if (d.Key.Contains("STREET"))
-                    {
-                        winnings+=d.Value * 12;
-                    }
-                    
-                    //four numbers - corner bet - payout 9x
-                    else if (d.Key.Contains("CORNER"))
-                    {
-                        winnings += d.Value * 9;
-                    }
-                
-                    //six number bets - line bets - payout 6x
-                    else if (d.Key.Contains("LINE"))
-                    {
-                        winnings += d.Value * 6;
-                    }
                 }
+                //split bets - two numbers - payout 18x
+                //if the bet contains both the "SPLIT" keyword and the winning number
+                else if (d.Key.Contains("SPLIT") && d.Key.Contains(winningBets.Substring(0, winningBets.IndexOf(","))))
+                {
+                    winnings += d.Value * 18;
+                }
+                //three numbers - street bets - payout 12x
+                else if (d.Key.Contains("STREET"))
+                {
+                    winnings += d.Value * 12;
+                }
+
+                //four numbers - corner bet - payout 9x
+                else if (d.Key.Contains("CORNER"))
+                {
+                    winnings += d.Value * 9;
+                }
+
+                //six number bets - line bets - payout 6x
+                else if (d.Key.Contains("LINE"))
+                {
+                    winnings += d.Value * 6;
+                }
+
             }
+
+            chips += winnings;
 
             //let the user know how much they have won, encourage them to try again if they lose
             if (winnings > 0)
-            { MessageBox.Show("Congratulations, you won " + winnings + " chips!!"); }
+            {
+                //if we want to play again
+                if (MessageBox.Show("Congratulations, you won " + winnings + " chips!! \n Would you like to play the same bets and spin again?", "YIPPEE!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    Respin();
+                }
+
+            }
             else
-            { MessageBox.Show("You didn't win anything, better luck next time."); }
+            {
+                //ask the user if they want to place the same bets, if they do:
+                if (MessageBox.Show("You didn't win anything, better luck next time. \n Would you like to place the same bets and spin again?", "oh hecc", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
 
-            chips += winnings;
+              Respin();
+                }
+                
+            }
+            
+
         }
-
 
         //------------BETTING FUNCTIONS------------
 
@@ -309,40 +334,39 @@ namespace roulette
             //get the button that was pressed
             Button btn = sender as Button;
 
-            //get the number that the button corresponds to
-            txtBet.Text = btn.Content.ToString();
+            //if we're placing a split bet, we need to capture the numbers for the bet
+            if (splitBetBeingPlaced)
+            {
+                //if we can parse the number to int (ignore any buttons that are not numeric)
+                if (int.TryParse(btn.Content.ToString(), out int number))
+                {
+                    //if this is the first number in the split bet
+                    if (!waitingForSecondClick)
+                    {
+                        firstButton = number;
+                        waitingForSecondClick = true;
+                        //disable any buttons that are not adjacent to the one we have just clicked
 
-        }
+                    }
+                    //if this is the second number in the split bet, we can construct the bet and close out the split bet
+                    else
+                    {
+                        txtBet.Text = "SPLIT(" + firstButton + "," + number + ")";
+                        splitBetBeingPlaced = false;
+                    }
+                }
 
-        //split bets -- allow the user to click on the first number, and then only allow them to click on adjacent numbers
-        //also being worked on in desktop build
-        public void SplitBetClicked(object sender, RoutedEventArgs e)
-        {
-            //create the string that we are going to use to place the bet
-            string splitBet = "SPLIT (";
-
-
-            //if the user clicks the split bet button again, cancel the bet
-
-            //highlight the valid numbers that a user can bet on when they hover over their first number selection
-
-            //when the user selects their first number, disable all the invalid bets
-
-            //add the first number to the bet
-
-            //wait for them to click on the second number before adding it to the bet string
-            
-
-            //close the bet string, and return the bet we are placing
-            splitBet += ")";
-            txtBet.Text = splitBet;
-            
-
-
+            }
+            //if we're not placing a split bet
+            else
+            {
+                //get the number that the button corresponds to
+                txtBet.Text = btn.Content.ToString();
+            }
         }
 
         //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
-        //this function is being created on desktop
+       
         private void Line_Bet_Button_Click(object sender, RoutedEventArgs e)
         {
 
@@ -394,7 +418,6 @@ namespace roulette
             refreshUI();
         }
 
-
         //function to update the UI of the game when we either place a bet, remove a bet, or complete a round
         public void refreshUI()
         {
@@ -406,8 +429,7 @@ namespace roulette
             }
         }
 
-
-        //delete any non numeric characters from the betting text box as they are added
+        //deletes any non numeric characters from the betting text box as they are added
         private void txtBetAmount_TextChanged(object sender, TextChangedEventArgs e)
         {
             var textBox = sender as TextBox;
@@ -420,9 +442,7 @@ namespace roulette
             }
         }
 
-
         //function that suppports removing bets from the bet list, this function is called whenever the user presses the delete button to the side of each entry
-
         private void DeleteItem_Click(object sender, RoutedEventArgs e)
         {
             // Get the item associated with this button
@@ -438,6 +458,50 @@ namespace roulette
                 Bets.Remove(item); //remove the item from the list
             }
             refreshUI();
+        }
+
+        private void Split_Bet_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //flip the state of the split bet flag
+            splitBetBeingPlaced = !splitBetBeingPlaced;
+            waitingForSecondClick = false;
+            //create the string that we are going to use to place the bet
+
+
+
+            //if the user clicks the split bet button again, cancel the bet
+
+            //highlight the valid numbers that a user can bet on when they hover over their first number selection
+
+            //when the user selects their first number, disable all the invalid bets
+
+            //add the first number to the bet
+
+            //wait for them to click on the second number before adding it to the bet string
+
+
+            //close the bet string, and return the bet we are placing
+
+        }
+
+
+
+        //function that spins the wheel again with the same bets as the last round
+        private void Respin()
+        {           //if we have less chips than the total number of the bets, we can't spin again
+            if (chips < Bets.Values.Sum())
+            {
+                MessageBox.Show("you cannot respin as you don't have enough chips to place your bets");
+                return;
+            }
+
+            //place the bets again
+            chips -= Bets.Values.Sum();
+
+            //update the UI to show the deducted chips
+            refreshUI();
+            //spin the wheel again
+            Spin_Click(null, null);
         }
 
 
