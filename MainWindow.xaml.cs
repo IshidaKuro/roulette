@@ -16,6 +16,8 @@ using System.Windows.Shapes;
 
 ///<To-Do>
 ///
+/// ensure that bets on 12 do not pay out when we roll a 1 - 1 is contained in the string "12"
+/// 
 /// disable buttons that are not adjacent to the first button that was clicked for a split bet - right now we can bet on 13 and 36 in a split bet
 ///     
 /// add functionality for:
@@ -61,7 +63,7 @@ namespace roulette
         bool waitingForSecondClick = false;
 
         int firstButton = -2;
-
+        int winningNumber;
         //we want to have a list of all the buttons, this is so we can disable buttons
 
 
@@ -86,7 +88,7 @@ namespace roulette
         private void Spin_Click(object sender, RoutedEventArgs e)
         {
             //randomly generate the winning number
-            int winningNumber = rng.Next(-1,36);
+            winningNumber = rng.Next(-1,36);
             
 
             //display the winning number
@@ -242,7 +244,7 @@ namespace roulette
         public void PayoutBets()
         {
             int winnings = 0;
-
+            
             //for each bet on the list
             foreach(KeyValuePair<string, int> d in Bets)
             {
@@ -276,7 +278,7 @@ namespace roulette
                 }
                 //split bets - two numbers - payout 18x
                 //if the bet contains both the "SPLIT" keyword and the winning number
-                else if (d.Key.Contains("SPLIT") && d.Key.Contains(winningBets.Substring(0, winningBets.IndexOf(","))))
+                else if (d.Key.Contains("SPLIT") && d.Key.Contains(winningNumber.ToString()))
                 {
                     winnings += d.Value * 18;
                 }
