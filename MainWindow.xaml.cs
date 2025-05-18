@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -16,7 +17,6 @@ using System.Windows.Shapes;
 
 ///<To-Do>
 ///
-/// ensure that bets on 12 do not pay out when we roll a 1 - 1 is contained in the string "12"
 /// 
 /// disable buttons that are not adjacent to the first button that was clicked for a split bet - right now we can bet on 13 and 36 in a split bet
 ///     
@@ -30,8 +30,6 @@ using System.Windows.Shapes;
 
 namespace roulette
 {
-
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -53,19 +51,22 @@ namespace roulette
         static int[] reds = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
 
         //bets that are 50/50 shots - payout 1-1, so £1 of winnings and £1 for the initial ante
-        static string[] doublepayoutbets = { "RED", "BLACK", "EVEN", "ODD", "1 to 18" , "19 to 36" };
+        static string[] doublepayoutbets = { "RED", "BLACK", "EVEN", "ODD", "1 to 18", "19 to 36" };
 
         //bets that payout 2-1, so return triple when you win
-        static string[] triplepayoutbets = { "1st Column", "2nd Column","3rd Column", "1st 12", "2nd 12","3rd 12"};
-                
+        static string[] triplepayoutbets = { "1st Column", "2nd Column", "3rd Column", "1st 12", "2nd 12", "3rd 12" };
+
         //flags and variables for split bets
-        bool splitBetBeingPlaced = false;       
+        bool splitBetBeingPlaced = false;
         bool waitingForSecondClick = false;
 
         int firstButton = -2;
         int winningNumber;
-        //we want to have a list of all the buttons, this is so we can disable buttons
+        
 
+        //create an array to store all the buttons
+        Button[] AllButtons;
+        List<int> acceptableNumbers = new List<int>(); //this is used to store the numbers that we can place a bet on if we are placing a split bet
 
         public MainWindow()
         {
@@ -73,12 +74,16 @@ namespace roulette
             //initialize the player's chips when the main window is created
             chips = 1500;
 
-            List<Button> hoverButtons = new List<Button> { Btn1, Btn2, Btn3, Btn4, Btn5, Btn6, Btn7, Btn8, Btn9, Btn10, Btn11, Btn12, Btn13, Btn14, Btn15, Btn16, Btn17, Btn18, Btn19, Btn20, Btn21, Btn22, Btn23, Btn24, Btn25, Btn26, Btn27, Btn28, Btn29, Btn30, Btn31, Btn32, Btn33, Btn34, Btn35, Btn36 };
-
+            //grab all the buttons on the form so we can disable any that we don't want the user to be able to use
+                        
             //set the player's chip balance in the UI
             lblBalance.Content = "Player Balance: " + chips;       
         }
 
+        private void MainWindowLoaded(object sender, RoutedEventArgs e) 
+        {
+            AllButtons = MainWindowCanvas.Children.OfType<Button>().ToArray();
+        }
 
         /// <summary>
         /// function that is called when the "Spin" button has been clicked
@@ -249,9 +254,8 @@ namespace roulette
                 //d.Key = the bet placed in the Bets Dict
                 if (winningBets.Contains(d.Key))
                 {
-                    //if we hit a number - pays 35 to 1 - £1 bet returns £36 including initial bet
-                    //parse to int so that we don't pay out 36x to any area bets
-                    if (int.TryParse(d.Key, out _))
+                    //if we hit the winning number - pays 35 to 1 - $1 bet returns $36 including initial bet
+                    if (d.Key == winningNumber.ToString())
                     {
                         winnings += d.Value * 36;
                     }                    
@@ -284,8 +288,6 @@ namespace roulette
                 ///
                 /// </String.Contains_Bug_Explaination>
                 
-
-
 
                 //split bets - two numbers - payout 18x
                 //if the bet contains both the "SPLIT" keyword and the winning number
@@ -358,14 +360,39 @@ namespace roulette
                     {
                         firstButton = number;
                         waitingForSecondClick = true;
-                        //disable any buttons that are not adjacent to the one we have just clicked
 
+                        //determine the numbers that are adjacent to the one we have just clicked
+                        DetermineAcceptableNumbers(number);
+                       
+                        //only allow the user to click buttons that are appropriate bets
+                        foreach(Button b in AllButtons)
+                        {                          
+                            //enable the split button so we can cancel the bet
+                            if (b.Content.ToString().Contains("Split")) {continue;}
+                            //disable the button
+                            b.IsEnabled = false;
+                            //unless it is on the list
+
+                            //if the button is numeric
+                            if (int.TryParse(b.Content.ToString(), out int r))
+                            {                               
+                                //if the button is on the list of acceptable numbers
+                                if (!acceptableNumbers.Contains(r)) { continue; }
+                                
+                                //enable the button
+                                b.IsEnabled = true; 
+                            }
+                        }
+                            
+                        
                     }
                     //if this is the second number in the split bet, we can construct the bet and close out the split bet
                     else
                     {
                         txtBet.Text = "SPLIT(" + firstButton + "," + number + ")";
                         splitBetBeingPlaced = false;
+                        //enable the buttons again
+                        foreach (Button b in AllButtons) { b.IsEnabled = true; }
                     }
                 }
 
@@ -517,6 +544,7 @@ namespace roulette
             Spin_Click(null, null);
         }
 
+        //helper function to pull numeric values out of multi number bets
         private int[] extractNumericValues(string input)
         {
             int[] values;
@@ -529,6 +557,51 @@ namespace roulette
 
             return values;
 
+        }
+
+        private void DetermineAcceptableNumbers(int number) 
+        {
+            acceptableNumbers.Clear();
+            //if the number is 0 or 00
+            if (number <= 0)
+            {
+                acceptableNumbers.Append(1).Append(2).Append(3);
+            }
+            if (number % 3 == 1) //if the number is in the bottom row
+            {
+                //add the number above
+                acceptableNumbers.Add(number + 1);
+                //if the number is not in the first column, add the number from the preceding column
+                if (number > 3) { acceptableNumbers.Add(number - 3); }
+
+                //if we are not in the last column, add the number from the following column
+                if (number < 34) { acceptableNumbers.Add(number + 3); }
+            }
+            else if (number % 3 == 2) //if the number is on the middle row
+            {
+                //add the numbers above and below the current number
+                acceptableNumbers.Add(number - 1);
+                acceptableNumbers.Add(number + 1);
+
+                //if the number is not in the first column, add the number from the preceding column
+                if (number > 3) { acceptableNumbers.Add(number - 3); }
+
+                //if we are not in the last column, add the number from the following column
+                if (number < 34) { acceptableNumbers.Add(number + 3); }
+
+            }
+            else if (number % 3 == 0) //if the number is in the top row
+            {
+                //add the number below it
+                acceptableNumbers.Add(number -1);
+
+                //if the number is not in the first column, add the number from the preceding column
+                if (number > 3) { acceptableNumbers.Add(number - 3); }
+
+                //if we are not in the last column, add the number from the following column
+                if (number < 34) { acceptableNumbers.Add(number + 3); }
+
+            }
         }
 
         //    //add a hover handler to each button

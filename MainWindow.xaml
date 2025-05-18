@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="roulette.MainWindow"
         Title="Roulette" Height="600" Width="1600"
-        Background="DarkGreen">
-    <Canvas>
+        Background="DarkGreen"
+        Loaded="MainWindowLoaded">
+    <Canvas x:Name="MainWindowCanvas">
+        
         <Button x:Name="Btn0" Content="0" Width="60" Height="100" Canvas.Left="27" Canvas.Top="151" Background="ForestGreen" Foreground="White" RenderTransformOrigin="1.483,1.876" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
         <Button x:Name="Btn00" Content="00" Width="60" Height="95" Canvas.Left="27" Canvas.Top="51" Background="ForestGreen" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
 
