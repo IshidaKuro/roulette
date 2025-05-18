@@ -90,9 +90,6 @@ namespace roulette
             //randomly generate the winning number
             winningNumber = rng.Next(-1,36);
             
-
-            //display the winning number
-
             //reformat -1 to 00
             if(winningNumber == -1)
             {
@@ -100,6 +97,7 @@ namespace roulette
             }
             else
             {
+                //display the appropriate number in the winning number box
                 txtNumberOutput.Text = winningNumber.ToString();
             }
 
@@ -276,26 +274,39 @@ namespace roulette
                     }
 
                 }
+
+                ///<String.Contains_Bug_Explaination>
+                ///
+                /// for numeric matches, we can't use "contains" as "1" is contained in "21"
+                /// this would mean that we are paying out for bets that didn't actually win
+                /// we need to make sure we have exact numeric matches
+                /// to do so we will need to grab the actual integer values inside the bets             
+                ///
+                /// </String.Contains_Bug_Explaination>
+                
+
+
+
                 //split bets - two numbers - payout 18x
                 //if the bet contains both the "SPLIT" keyword and the winning number
-                else if (d.Key.Contains("SPLIT") && d.Key.Contains(winningNumber.ToString()))
+                else if (d.Key.Contains("SPLIT") && extractNumericValues(d.Key).Contains(winningNumber))
                 {
                     winnings += d.Value * 18;
                 }
                 //three numbers - street bets - payout 12x
-                else if (d.Key.Contains("STREET"))
+                else if (d.Key.Contains("STREET") && extractNumericValues(d.Key).Contains(winningNumber))
                 {
                     winnings += d.Value * 12;
                 }
 
                 //four numbers - corner bet - payout 9x
-                else if (d.Key.Contains("CORNER"))
+                else if (d.Key.Contains("CORNER") && extractNumericValues(d.Key).Contains(winningNumber))
                 {
                     winnings += d.Value * 9;
                 }
 
                 //six number bets - line bets - payout 6x
-                else if (d.Key.Contains("LINE"))
+                else if (d.Key.Contains("LINE") && extractNumericValues(d.Key).Contains(winningNumber))
                 {
                     winnings += d.Value * 6;
                 }
@@ -506,7 +517,19 @@ namespace roulette
             Spin_Click(null, null);
         }
 
+        private int[] extractNumericValues(string input)
+        {
+            int[] values;
 
+            //remove the closing bracket, trim everything upto and including the first bracket, and trim the whitespace
+            input = input.Replace(")", "").Substring(input.IndexOf("(")+1).Trim(); 
+
+            //split the string by the commas and parse it to an array of integers
+            values = Array.ConvertAll(input.Split(","), int.Parse);
+
+            return values;
+
+        }
 
         //    //add a hover handler to each button
 
