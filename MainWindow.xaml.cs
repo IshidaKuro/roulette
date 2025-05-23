@@ -16,13 +16,12 @@ using System.Windows.Shapes;
 
 
 ///<To-Do>
-///
 /// 
-/// disable buttons that are not adjacent to the first button that was clicked for a split bet - right now we can bet on 13 and 36 in a split bet
-///     
+/// ensure street bets are paying out properly
+/// 
+/// 
 /// add functionality for:
 /// 
-///         Betting on 3 numbers
 ///         Betting on 4 Numbers
 ///         Betting on 6 Numbers
 ///         
@@ -37,15 +36,22 @@ namespace roulette
     {
 
         bool reroll = false; //flag to determine if we're rolling again with the same bets 
+        
+        
         //the number of chips that the player has
         int chips = 0;
-        string winningBets = "";
+
+        int winningNumber; // the number that the roulette wheel has landed on
+
+        string winningBets = ""; //string to contain the bets that have won. eg: 16, RED, EVEN, 1 to 18, 1st Column, 2nd 12 
 
         //random number generator
         Random rng = new Random();
 
         //store the bets and the values that have been bet
         Dictionary<string, int> Bets = new Dictionary<string, int>();
+
+        //----------------static gameplay variables-----------------------------------------------------------------------------------------------------------------------
 
         //numbers on a roulette board that are red -- if the number is greater than 0 and not on this list then we can assume that it is black
         static int[] reds = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
@@ -56,16 +62,24 @@ namespace roulette
         //bets that payout 2-1, so return triple when you win
         static string[] triplepayoutbets = { "1st Column", "2nd Column", "3rd Column", "1st 12", "2nd 12", "3rd 12" };
 
-        //flags and variables for split bets
-        bool splitBetBeingPlaced = false;
-        bool waitingForSecondClick = false;
 
-        int firstButton = -2;
-        int winningNumber;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
         
+        //---------------flags and variables for split bets----------------------------------------------------------------------------------------------------------------
+        
+        bool splitBetBeingPlaced = false; // flag to determine if a split bet is being placed
+        bool waitingForSecondClick = false; // if we are waiting for the user to click again while making a split bet
 
-        //create an array to store all the buttons
-        Button[] AllButtons;
+        int firstButton; // the first button that was clicked while making a split bet
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        bool placingStreetBet = false;
+
+
+        
+        Button[] AllButtons; //create an array to store all the buttons
         List<int> acceptableNumbers = new List<int>(); //this is used to store the numbers that we can place a bet on if we are placing a split bet
 
         public MainWindow()
@@ -73,15 +87,14 @@ namespace roulette
             InitializeComponent();
             //initialize the player's chips when the main window is created
             chips = 1500;
-
-            //grab all the buttons on the form so we can disable any that we don't want the user to be able to use
-                        
+                                             
             //set the player's chip balance in the UI
             lblBalance.Content = "Player Balance: " + chips;       
         }
 
         private void MainWindowLoaded(object sender, RoutedEventArgs e) 
         {
+            //grab all the buttons on the form so we can enable and disable them later
             AllButtons = MainWindowCanvas.Children.OfType<Button>().ToArray();
         }
 
@@ -397,7 +410,36 @@ namespace roulette
                 }
 
             }
-            //if we're not placing a split bet
+
+            //if we are placing a street bet
+            else if(placingStreetBet)
+            {
+                //determine which number has been clicked -- only numbers can be clicked in this mode
+                int n =int.Parse(btn.Content.ToString());
+
+                switch(DetermineRow(n))
+                {
+                    //if the button is [1, 4, 7...]
+                    case 1:
+                        txtBet.Text = "Split(" + n + ", " + (n+1) + ", " + (n+2) + ")";
+                    break;
+                    
+                    //if the button is [2, 5, 8...]
+                    case 2:
+                        txtBet.Text = "Split(" + (n-1) + ", " + n + ", " + (n+1) + ")";
+                    break;
+                    
+                    //if the button is [3, 6, 9...]
+                    case 3:
+                        txtBet.Text = "Split(" + (n-2) + ", " + (n-1) + ", " + n + ")";
+                        
+                    break;
+                }
+
+                placingStreetBet = false;
+            }
+
+            //if we're not in a special betting mode
             else
             {
                 //get the number that the button corresponds to
@@ -500,6 +542,7 @@ namespace roulette
             refreshUI();
         }
 
+        //function that is called whenever the split bet button is clicked
         private void Split_Bet_Button_Click(object sender, RoutedEventArgs e)
         {
             //flip the state of the split bet flag
@@ -523,8 +566,6 @@ namespace roulette
             //close the bet string, and return the bet we are placing
 
         }
-
-
 
         //function that spins the wheel again with the same bets as the last round
         private void Respin()
@@ -559,6 +600,7 @@ namespace roulette
 
         }
 
+        //this function returns the valid second numbers when making a split bet
         private void DetermineAcceptableNumbers(int number) 
         {
             acceptableNumbers.Clear();
@@ -602,6 +644,51 @@ namespace roulette
                 if (number < 34) { acceptableNumbers.Add(number + 3); }
 
             }
+        }
+
+        //funciton that is called when the Street Bet button is clicked
+        private void Street_Bet_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
+            placingStreetBet = !placingStreetBet;
+
+
+            //disable any non numeric buttons if we are entering this mode, and enable them if we are exiting this mode
+            foreach (Button b in AllButtons)
+            {
+                //skip over the street bet button as we want to be able to exit this mode
+                if(b.Content.ToString().Equals("Street Bet (3 numbers)")) { continue; }
+               
+                //if the content of the button is non numeric
+                if(!int.TryParse(b.Content.ToString(), out _))
+                {
+                    b.IsEnabled = !placingStreetBet;
+                }
+            }
+
+        }
+
+        //function that returns the row that the number is situated in
+        private int DetermineRow(int number)
+        {
+            int row = 0;
+
+            switch(number % 3)
+            {
+                case 0:
+                    row = 3;
+                    break;
+                
+                case 1:
+                    row = 1;
+                    break;
+                
+                case 2:
+                    row = 2;
+                    break;
+            }
+
+            return row;
         }
 
         //    //add a hover handler to each button

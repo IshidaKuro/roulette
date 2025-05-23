@@ -75,7 +75,7 @@
         <!--Other types of bet -->
         <Button x:Name="First_Five_Button" Content="First Five" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="51" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="NumberButtonClicked"/>
         <Button x:Name="Split_Bet_Button" Content="Split Bet (2 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="116" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Split_Bet_Button_Click"/>
-        <Button x:Name="Street_Bet_Button" Content="Street Bet (3 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="181" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button x:Name="Street_Bet_Button" Content="Street Bet (3 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="181" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Street_Bet_Button_Click"/>
         <Button x:Name="Croner_Bet_Button" Content="Corner Bet (4 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="246" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button x:Name="Line_Bet_Button" Content="Line Bet (6 numbers)" Width="130" Height="50" Canvas.Left="1055" Canvas.Top="301" Background="Gray" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Line_Bet_Button_Click"/>
 
