@@ -17,10 +17,48 @@ using System.Windows.Shapes;
 
 
 ///<To-Do>
-///
-/// add split bet mode toggle functionality 
 /// 
+/// 
+/// 
+/// 
+/// 
+/// 
+/// optimisation:
+/// 
+///     pass bets as enumerated values - determine type of bet by length
+///     enumerate non numeric bets
+///     winning bets to array of ints - run a contains check to determine if a bet has been won
+///     
 ///</To-Do>
+
+
+///<Numeric-Values-For-Bets>
+///
+///   
+///  Numeric Bets -- -1 to 36
+///  
+///  Black -- 40
+///  Red -- 41
+///  Even -- 42
+///  Odd -- 43
+///  First Half -- 44 
+///  Second Half -- 45
+///  
+///  1st Column -- 46
+///  2nd Column -- 47
+///  3rd Column -- 48
+///  
+///  1st 12 -- 49 
+///  2nd 12 -- 50
+///  3rd 12 -- 51
+/// 
+///  Split -- byte[2]
+///  Street -- byte[3]
+///  Corner --byte[4]
+///  Line -- byte[6]
+/// 
+/// </Numeric-Values-For-Bets>
+
 
 namespace roulette
 {
@@ -107,7 +145,7 @@ namespace roulette
         private void Spin_Click(object sender, RoutedEventArgs e)
         {
             //randomly generate the winning number
-            winningNumber = rng.Next(-1, 36);
+            winningNumber = (sbyte)rng.Next(-1, 36);
 
             //reformat -1 to 00
             if (winningNumber == -1)
@@ -506,7 +544,7 @@ namespace roulette
             foreach (Button btn in affectedNumbers)
             {
                 //the buttons only need to be reset to red or black as those are the only numbers that a player can place multiple bets on
-                if (reds.Contains(int.Parse(btn.Content.ToString())))
+                if (reds.Contains(sbyte.Parse(btn.Content.ToString())))
                 {
                     btn.Background = Brushes.Red;
                 }
@@ -527,7 +565,7 @@ namespace roulette
             placingSplitBet = !placingSplitBet;
             waitingForSecondClick = false;    
             
-            DisableNonNumericButtons(sender, placingStreetBet);
+            DisableNonNumericButtons(sender, placingSplitBet);
 
         }
 
@@ -917,6 +955,57 @@ namespace roulette
             }
 
 
+        }
+        
+        public string MakeBetHumanReadable(sbyte[] input)
+        {
+            string result = "";
+
+            //determine the kind of bet by the length
+            switch (input.Length)
+            {
+                case 2: result += "Split ("; break;
+                case 3: result += "Street ("; break;
+                case 4: result += "Corner ("; break;
+                case 6: result += "Line ("; break;
+            }
+            
+            foreach (sbyte b in input)
+            {
+                result += b.ToString();
+                if(b!= input.Last<sbyte>())
+                {
+                    result += ", ";
+                }
+            }
+
+            result += ")";
+            return result;    
+        }
+        public string MakeBetHumanReadable(sbyte input)
+        {
+            string result = "";
+            
+            switch (input)
+            {
+                case -1: result = "00";  break;
+                case <38: result = input.ToString(); break;
+                case 40: result = "Black"; break;
+                case 41: result = "Red"; break;
+                case 42: result = "Even"; break;
+                case 43: result = "Odd"; break;
+                case 44: result = "1 to 18"; break;
+                case 45: result = "19 to 36"; break;
+                case 46: result = "1st Column"; break;
+                case 47: result = "2nd Column"; break;
+                case 48: result = "3rd Column"; break;
+                case 49: result = "1st 12"; break;
+                case 50: result = "2nd 12"; break;
+                case 51: result = "3rd 12"; break;
+            }   
+            
+            return result;
+        
         }
 
     }
