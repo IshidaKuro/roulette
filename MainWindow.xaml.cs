@@ -18,8 +18,8 @@ using System.Windows.Shapes;
 
 ///<To-Do>
 ///
-/// alter onhover method to highlight other numbers when we are in an alternative betting mode
-///
+/// add split bet mode toggle functionality 
+/// 
 ///</To-Do>
 
 namespace roulette
@@ -60,13 +60,14 @@ namespace roulette
         bool placingSplitBet = false; // flag to determine if a split bet is being placed
 
         //-----------------------VARIABLES FOR SPLIT BETS--------------------------------------------------------------------------------------------------------
-        
+
         bool waitingForSecondClick = false; // if we are waiting for the user to click again while making a split bet
         int firstButton; // the first button that was clicked while making a split bet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         Button[] AllButtons; //create an array to store all the buttons
+        Button[] NumericButtons;
         List<int> acceptableNumbers = new List<int>(); //this is used to store the numbers that we can place a bet on if we are placing a split bet
 
         //---------------------------------------------------------------------------------
@@ -84,6 +85,16 @@ namespace roulette
         {
             //grab all the buttons on the form so we can enable and disable them later
             AllButtons = MainWindowCanvas.Children.OfType<Button>().ToArray();
+            
+            List<Button>nb = new List<Button>();
+            foreach (Button b in AllButtons) 
+            {
+                if (int.TryParse(b.Content.ToString(), out _))
+                {
+                    nb.Add(b);
+                }
+            }
+            NumericButtons = nb.ToArray();
         }
 
         //------------BUTTON CLICKS------------
@@ -347,6 +358,166 @@ namespace roulette
             refreshUI();
         }
 
+
+        //-------------MOUSE HOVER EVENTS---------------------
+
+        List<Button> affectedNumbers = new();
+
+        //run when mouse hovers over a numeric button
+        void Button_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Button btn = null;
+            if (sender != null)
+            {
+                //get the button that is being hovered over
+                btn = sender as Button;
+            }
+
+            if (btn != null)
+            {
+                if (placingStreetBet) //if the user is placing a street bet
+                {
+                    //add the button we are hovering over to the list
+                    affectedNumbers.Add(btn);
+
+                    //determine the other buttons that we need to highlight 
+                    int offset1 = 1, offset2 = -1;
+                    int n = int.Parse(btn.Content.ToString());
+                    switch (DetermineRow(n))
+                    {                        
+                        //if the button is [1, 4, 7...]
+                        case 1:
+                             offset2=2;
+                            break;
+
+                        //if the button is [3, 6, 9...]
+                        case 3:
+
+                            offset1=-2;
+                            break;
+                    }
+
+                    //add the appropriate buttons to the list
+                    foreach(Button b in NumericButtons)
+                    {
+                        if (b.Content.Equals((n + offset1).ToString()) || b.Content.Equals((n + offset2).ToString()))
+                        {
+                            affectedNumbers.Add(b);
+
+                        }
+                        //break the loop if we have all 3 buttons
+                        if(affectedNumbers.Count ==3)
+                        {
+                            break;
+                        }
+                    }
+                }
+                else if (placingLineBet) //if the user is placing a line bet
+                {
+                    //get the number of the button that has been clicked
+                    int n = int.Parse(btn.Content.ToString());
+                    int xa = -1, xb = 1, yOffset = 3;
+                    //determine which row we are in and grab all the relevent numbers
+                    switch (DetermineRow(n))
+                    {
+                        case 1: xa = 2; break;
+                        case 3: xb = -2; break;
+                    }
+
+                    //if we are in the last column, grab the numbers to the left
+                    if (n > 33) { yOffset = -3; }
+
+                    int[] betnumbers = { n, n + xa, n + xb, n + yOffset, n + xa + yOffset, n + xb + yOffset };
+
+                    //add the appropriate buttons to the list
+                    foreach (Button b in NumericButtons)
+                    {
+                        if (betnumbers.Contains(int.Parse(b.Content.ToString())))
+                        {
+                            affectedNumbers.Add(b);
+                        }
+                        //break the loop if we have all 6 buttons
+                        if (affectedNumbers.Count == 6)
+                        {
+                            break;
+                        }
+                    }
+                }
+                else if (placingCornerBet) //if the user is placing a corner bet
+                {
+                    int n = int.Parse(btn.Content.ToString());
+                    
+                    //determine the numbers that we need to add to the list
+
+                    //for this bet, the default behaviour will be to grab the number immediately below and the numbers to the right of the number 
+                    //  eg. [x] [y] []
+                    //      [y] [y] []
+                    //      [ ] [ ] []
+                    int xOffset = -1, yOffset = 3;
+
+                    //if the selected number is in the bottom row, grab the number above and the corresponding numbers to the right
+                    //  eg. [ ] [ ] []
+                    //      [y] [y] []
+                    //      [x] [y] []
+                    if (DetermineRow(n) == 1) { xOffset = 1; }
+
+                    //if the button is in the last column, grab the numbers to the left
+                    //  eg. [ ] [y] [x]
+                    //      [ ] [y] [y]
+                    //      [ ] [ ] [ ]
+                    if (n > 33) { yOffset = -3; }
+
+                    int[] betnumbers = { n, n + xOffset, n + yOffset, n + xOffset + yOffset };
+
+                    //add the appropriate buttons to the list
+                    foreach (Button b in NumericButtons)
+                    {
+                        if (betnumbers.Contains(int.Parse(b.Content.ToString())))
+                        {
+                            affectedNumbers.Add(b);
+                        }
+                        //break the loop if we have all 4 buttons
+                        if (affectedNumbers.Count == 4)
+                        {
+                            break;
+                        }
+                    }
+
+                }
+                else //if we only need to highlight one number
+                {
+                    affectedNumbers.Add(btn);
+                }
+
+                //highlight the appropriate numbers
+                foreach(Button b in affectedNumbers)
+                {
+                    b.Background = Brushes.Gold;
+                }
+
+            }
+
+        }
+
+        //runs when mouse stops hovering over a numeric button
+        void  Button_MouseLeave(object sender, MouseEventArgs e)
+        {
+            //reset the buttons to their original background colours
+            foreach (Button btn in affectedNumbers)
+            {
+                //the buttons only need to be reset to red or black as those are the only numbers that a player can place multiple bets on
+                if (reds.Contains(int.Parse(btn.Content.ToString())))
+                {
+                    btn.Background = Brushes.Red;
+                }
+                else
+                {
+                    btn.Background = Brushes.Black;
+                }
+            }
+            affectedNumbers.Clear();
+        }
+
         //-------------MODE SWITCHES-------------------------  
 
         //function that is called whenever the split bet button is clicked, split bets contain 2 numbers
@@ -356,7 +527,7 @@ namespace roulette
             placingSplitBet = !placingSplitBet;
             waitingForSecondClick = false;    
             
-            DisableNonNumericButtons(sender);
+            DisableNonNumericButtons(sender, placingStreetBet);
 
         }
 
@@ -366,7 +537,7 @@ namespace roulette
             //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
             placingStreetBet = !placingStreetBet;
 
-            DisableNonNumericButtons(sender);
+            DisableNonNumericButtons(sender, placingStreetBet);
 
         }
 
@@ -376,7 +547,7 @@ namespace roulette
             //flip the placing corner bet tag, this allows the player to back out of the mode if they click the button again
            placingCornerBet = !placingCornerBet;
 
-            DisableNonNumericButtons(sender);
+            DisableNonNumericButtons(sender, placingCornerBet);
         }
 
         //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
@@ -385,7 +556,7 @@ namespace roulette
             //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
             placingLineBet = !placingLineBet;
 
-            DisableNonNumericButtons(sender);
+            DisableNonNumericButtons(sender,placingLineBet);
         }
 
         //-------------HELPER FUNCTIONS-------------------------------------
@@ -411,7 +582,7 @@ namespace roulette
         /// Disables non numeric numbers if the player is placing a bet on multiple numbers
         /// </summary>
         /// <param name="sender"> The button that is being pressed - this is to ensure we keep this button active so we can back out of the alternative betting mode</param>
-        public void DisableNonNumericButtons(object sender)
+        public void DisableNonNumericButtons(object sender, bool flag)
                 {
                     foreach (Button b in AllButtons)
                     {
@@ -422,7 +593,7 @@ namespace roulette
                         if (!int.TryParse(b.Content.ToString(), out _))
                         {
                             //disable the button
-                            b.IsEnabled = false;
+                            b.IsEnabled = !flag;
                         }
                     }
                 }
