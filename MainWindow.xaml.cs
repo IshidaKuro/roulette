@@ -14,27 +14,20 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-
-
 ///<To-Do>
 /// 
-/// 
-/// 
-/// 
-/// 
+///  Organise Variables
 /// 
 /// optimisation:
 /// 
 ///     pass bets as enumerated values - determine type of bet by length
 ///     enumerate non numeric bets
-///     winning bets to array of ints - run a contains check to determine if a bet has been won
+///     winning bets to array of numbers - run a contains check to determine if a bet has been won
 ///     
 ///</To-Do>
 
-
 ///<Numeric-Values-For-Bets>
 ///
-///   
 ///  Numeric Bets -- -1 to 36
 ///  
 ///  Black -- 40
@@ -52,13 +45,14 @@ using System.Windows.Shapes;
 ///  2nd 12 -- 50
 ///  3rd 12 -- 51
 /// 
+///  First Five -52
+/// 
 ///  Split -- byte[2]
 ///  Street -- byte[3]
 ///  Corner --byte[4]
 ///  Line -- byte[6]
 /// 
 /// </Numeric-Values-For-Bets>
-
 
 namespace roulette
 {
@@ -67,17 +61,17 @@ namespace roulette
     /// </summary>
     public partial class MainWindow : Window
     {
-
         bool reroll = false; //flag to determine if we're rolling again with the same bets        
         int chips = 0; //the number of chips that the player has
         int winningNumber; // the number that the roulette wheel has landed on
         string winningBets = ""; //string to contain the bets that have won. eg: 16, RED, EVEN, 1 to 18, 1st Column, 2nd 12 
+        sbyte[] currentBet; //the bet that the user is currently placing
 
         //random number generator
         Random rng = new Random();
 
         //store the bets and the values that have been bet
-        Dictionary<string, int> Bets = new Dictionary<string, int>();
+        Dictionary<string, int> Bets = new();
 
         //----------------static gameplay variables-----------------------------------------------------------------------------------------------------------------------
 
@@ -92,10 +86,7 @@ namespace roulette
 
         //-----------------------MODE FLAGS-------------------------------------------------------------------------------------------------------------------------------
 
-        bool placingStreetBet = false;
-        bool placingLineBet = false;
-        bool placingCornerBet = false;
-        bool placingSplitBet = false; // flag to determine if a split bet is being placed
+        bool placingStreetBet = false, placingLineBet = false, placingCornerBet = false, placingSplitBet = false;
 
         //-----------------------VARIABLES FOR SPLIT BETS--------------------------------------------------------------------------------------------------------
 
@@ -137,11 +128,7 @@ namespace roulette
 
         //------------BUTTON CLICKS------------
 
-        /// <summary>
-        /// function that is called when the "Spin" button has been clicked
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        //button that spins the wheel
         private void Spin_Click(object sender, RoutedEventArgs e)
         {
             //randomly generate the winning number
@@ -227,154 +214,155 @@ namespace roulette
             refreshUI();
         }
 
-        //betting on an individual number -- we can just grab the number from the button that was pressed -- this function can also be used for the EVEN, ODD, RED and BLACK bets
+        //betting on an individual value
         public void NumberButtonClicked(object sender, RoutedEventArgs e)
         {
-            //get the button that was pressed
-            Button btn = sender as Button;
+            // Validate the sender is a Button, otherwise exit
+            if (sender is not Button btn) return;
 
-            //if we're placing a split bet, we need to capture the numbers for the bet
+            sbyte number = GetBetCode(btn.Content.ToString());
+
+            // Handle split bet placement logic
             if (placingSplitBet)
             {
-                //if we can parse the number to int (ignore any buttons that are not numeric)
-                if (int.TryParse(btn.Content.ToString(), out int number))
+                // First number clicked in split bet
+                if (!waitingForSecondClick)
                 {
-                    //if this is the first number in the split bet
-                    if (!waitingForSecondClick)
+                    // Store first selected number and wait for second click
+                    firstButton = number;
+                    waitingForSecondClick = true;
+
+                    // Determine valid adjacent numbers for split bet based on first number
+                    DetermineAcceptableNumbers(number);
+
+                    // Disable all buttons except the ones allowed for the second split number
+                    foreach (Button b in AllButtons)
                     {
-                        firstButton = number;
-                        waitingForSecondClick = true;
+                        // Always keep Split buttons enabled (to allow cancel)
+                        if (b.Content.ToString().Contains("Split")) continue;
 
-                        //determine the numbers that are adjacent to the one we have just clicked
-                        DetermineAcceptableNumbers(number);
-
-                        //only allow the user to click buttons that are appropriate bets
-                        foreach (Button b in AllButtons)
-                        {
-                            //enable the split button so we can cancel the bet
-                            if (b.Content.ToString().Contains("Split")) { continue; }
-                            //disable the button
-                            b.IsEnabled = false;
-                            //unless it is on the list
-
-                            //if the button is numeric
-                            if (int.TryParse(b.Content.ToString(), out int r))
-                            {
-                                //if the button is on the list of acceptable numbers
-                                if (!acceptableNumbers.Contains(r)) { continue; }
-
-                                //enable the button
-                                b.IsEnabled = true;
-                            }
-                        }
-
-
-                    }
-                    //if this is the second number in the split bet, we can construct the bet and close out the split bet
-                    else
-                    {
-                        txtBet.Text = "SPLIT(" + firstButton + "," + number + ")";
-                        placingSplitBet = false;
-                        //enable the buttons again
-                        EnableNonNumericButtons();
+                        // Disable the button by default
+                        b.IsEnabled = false;
+                        b.Background = Brushes.DarkGreen;
+                        // Enable only buttons that represent acceptable adjacent numbers
+                        if (sbyte.TryParse(b.Content.ToString(), out sbyte r) && acceptableNumbers.Contains(r))
+                            b.IsEnabled = true;
                     }
                 }
+                else
+                {
+                    // Second number clicked in split bet
+                    // Create bet array, sort it for consistent order, and assign to currentBet
+                    sbyte[] bet = new sbyte[] { (sbyte)firstButton, number };
+                    Array.Sort(bet);
+                    currentBet = bet;
 
+                    // Update the text box with the human-readable representation of the bet
+                    txtBet.Text = MakeBetHumanReadable(currentBet);
+
+                    // Reset split bet flags and re-enable buttons
+                    placingSplitBet = false;
+                    waitingForSecondClick = false;
+                    EnableNonNumericButtons();
+                }
             }
-
-            //if we are placing a street bet
+            // Handle street bet placement logic
             else if (placingStreetBet)
             {
-                //determine which number has been clicked -- only numbers can be clicked in this mode
-                int n = int.Parse(btn.Content.ToString());
+                // Determine which row the clicked number belongs to (1, 2, or 3)
+                int row = DetermineRow(number);
 
-                switch (DetermineRow(n))
+                // Create the street bet numbers based on the row
+                sbyte[] bet = row switch
                 {
-                    //if the button is [1, 4, 7...]
-                    case 1:
-                        txtBet.Text = "STREET(" + n + ", " + (n + 1) + ", " + (n + 2) + ")";
-                        break;
+                    1 => new sbyte[] { number, (sbyte)(number + 1), (sbyte)(number + 2) },
+                    2 => new sbyte[] { (sbyte)(number - 1), number, (sbyte)(number + 1) },
+                    3 => new sbyte[] { (sbyte)(number - 2), (sbyte)(number - 1), number },
+                    _ => null
+                };
 
-                    //if the button is [2, 5, 8...]
-                    case 2:
-                        txtBet.Text = "STREET(" + (n - 1) + ", " + n + ", " + (n + 1) + ")";
-                        break;
-
-                    //if the button is [3, 6, 9...]
-                    case 3:
-                        txtBet.Text = "STREET(" + (n - 2) + ", " + (n - 1) + ", " + n + ")";
-
-                        break;
+                if (bet != null)
+                {
+                    // Sort and store the bet array, then update the display text
+                    Array.Sort(bet);
+                    currentBet = bet;
+                    txtBet.Text = MakeBetHumanReadable(currentBet);
                 }
 
-                //exit the mode
+                // Exit street bet mode and re-enable buttons
                 placingStreetBet = false;
                 EnableNonNumericButtons();
-
             }
-
-            //if we are placing a corner bet
+            // Handle corner bet placement logic
             else if (placingCornerBet)
             {
-                //get the number of the button that has been clicked
-                int n = int.Parse(btn.Content.ToString());
+                // Determine vertical offset based on row (top or bottom)
+                int xOffset = DetermineRow(number) == 1 ? 1 : -1;
 
-                //for this bet, the default behaviour will be to grab the number immediately below and the numbers to the right of the number 
-                //  eg. [x] [y] []
-                //      [y] [y] []
-                //      [ ] [ ] []
-                int xOffset = -1, yOffset = 3;
+                // Determine horizontal offset based on column (last column or not)
+                int yOffset = number > 33 ? -3 : 3;
 
-                //if the selected number is in the bottom row, grab the number above and the corresponding numbers to the right
-                //  eg. [ ] [ ] []
-                //      [y] [y] []
-                //      [x] [y] []
-                if (DetermineRow(n) == 1) { xOffset = 1;}
-                
-                //if the button is in the last column, grab the numbers to the left
-                //  eg. [ ] [y] [x]
-                //      [ ] [y] [y]
-                //      [ ] [ ] [ ]
-                if(n > 33) { yOffset = -3;}
+                // Create corner bet numbers using calculated offsets
+                sbyte[] bet = new sbyte[]
+                {
+            number,
+            (sbyte)(number + xOffset),
+            (sbyte)(number + yOffset),
+            (sbyte)(number + xOffset + yOffset)
+                };
 
-                int[] betnumbers = { n, n + xOffset, n + yOffset, n + xOffset + yOffset };
+                // Sort and store the bet array, update display text
+                Array.Sort(bet);
+                currentBet = bet;
+                txtBet.Text = MakeBetHumanReadable(currentBet);
 
-                txtBet.Text = ConstructString(betnumbers);
-
-                //exit the mode
+                // Exit corner bet mode and re-enable buttons
                 placingCornerBet = false;
                 EnableNonNumericButtons();
             }
-
-            //if we are placing a line bet
+            // Handle line bet placement logic
             else if (placingLineBet)
             {
-                //get the number of the button that has been clicked
-                int n = int.Parse(btn.Content.ToString());
-                int xa = -1, xb = 1, yOffset = 3;
-                //determine which row we are in and grab all the relevent numbers
-                switch(DetermineRow(n))
+                // Default horizontal offsets for line bet
+                int xa = -1, xb = 1;
+                int yOffset = 3;
+
+                // Adjust horizontal offsets based on row
+                switch (DetermineRow(number))
                 {
-                    case 1:  xa = 2; break;                    
-                    case 3:  xb = -2; break;
+                    case 1: xa = 2; break;  // Left side adjustment for first row
+                    case 3: xb = -2; break; // Right side adjustment for third row
                 }
-                
-                //if we are in the last column, grab the numbers to the left
-                if (n > 33) { yOffset = -3; }
 
-                int[] betnumbers = { n, n + xa, n+xb, n + yOffset, n + xa + yOffset, n+xb+yOffset };
+                // Adjust vertical offset if in last column
+                if (number > 33) yOffset = -3;
 
-                txtBet.Text = ConstructString(betnumbers);
-                
-                //exit the mode
+                // Create line bet numbers using offsets
+                sbyte[] bet = new sbyte[]
+                {
+            number,
+            (sbyte)(number + xa),
+            (sbyte)(number + xb),
+            (sbyte)(number + yOffset),
+            (sbyte)(number + xa + yOffset),
+            (sbyte)(number + xb + yOffset)
+                };
+
+                // Sort, store, and display the bet
+                Array.Sort(bet);
+                currentBet = bet;
+                txtBet.Text = MakeBetHumanReadable(currentBet);
+
+                // Exit line bet mode and re-enable buttons
                 placingLineBet = false;
                 EnableNonNumericButtons();
             }
-            //if we're not in a special betting mode
+            // Handle regular single number bets or other cases
             else
             {
-                //get the number that the button corresponds to
-                txtBet.Text = btn.Content.ToString();
+                // Store single number bet and update display
+                currentBet = new sbyte[] { number };
+                txtBet.Text = MakeBetHumanReadable(currentBet[0]);
             }
         }
 
@@ -396,6 +384,46 @@ namespace roulette
             refreshUI();
         }
 
+        //-------------MODE SWITCHES-------------------------  
+
+        //function that is called whenever the split bet button is clicked, split bets contain 2 numbers
+        private void Split_Bet_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //flip the state of the split bet flag
+            placingSplitBet = !placingSplitBet;
+            waitingForSecondClick = false;
+
+            DisableNonNumericButtons(sender, placingSplitBet);
+
+        }
+
+        //funciton that is called when the Street Bet button is clicked, Street bets contain 3 numbers
+        private void Street_Bet_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
+            placingStreetBet = !placingStreetBet;
+
+            DisableNonNumericButtons(sender, placingStreetBet);
+
+        }
+
+        //corner bets consist of 4 numbers
+        private void Corner_Bet_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //flip the placing corner bet tag, this allows the player to back out of the mode if they click the button again
+            placingCornerBet = !placingCornerBet;
+
+            DisableNonNumericButtons(sender, placingCornerBet);
+        }
+
+        //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
+        private void Line_Bet_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
+            placingLineBet = !placingLineBet;
+
+            DisableNonNumericButtons(sender, placingLineBet);
+        }
 
         //-------------MOUSE HOVER EVENTS---------------------
 
@@ -556,70 +584,8 @@ namespace roulette
             affectedNumbers.Clear();
         }
 
-        //-------------MODE SWITCHES-------------------------  
-
-        //function that is called whenever the split bet button is clicked, split bets contain 2 numbers
-        private void Split_Bet_Button_Click(object sender, RoutedEventArgs e)
-        {
-            //flip the state of the split bet flag
-            placingSplitBet = !placingSplitBet;
-            waitingForSecondClick = false;    
-            
-            DisableNonNumericButtons(sender, placingSplitBet);
-
-        }
-
-        //funciton that is called when the Street Bet button is clicked, Street bets contain 3 numbers
-        private void Street_Bet_Button_Click(object sender, RoutedEventArgs e)
-        {
-            //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
-            placingStreetBet = !placingStreetBet;
-
-            DisableNonNumericButtons(sender, placingStreetBet);
-
-        }
-
-        //corner bets consist of 4 numbers
-        private void Corner_Bet_Button_Click(object sender, RoutedEventArgs e)
-        {
-            //flip the placing corner bet tag, this allows the player to back out of the mode if they click the button again
-           placingCornerBet = !placingCornerBet;
-
-            DisableNonNumericButtons(sender, placingCornerBet);
-        }
-
-        //line bets are 6 numbers -- select the top left number and highlight the other 5, if we are on the last column we need to only highlight the last 6 numbers
-        private void Line_Bet_Button_Click(object sender, RoutedEventArgs e)
-        {
-            //flip the placing street bet tag, this allows the player to back out of the street bet mode if they click the button again
-            placingLineBet = !placingLineBet;
-
-            DisableNonNumericButtons(sender,placingLineBet);
-        }
-
         //-------------HELPER FUNCTIONS-------------------------------------
 
-        public string ConstructString(int[] input)
-        {
-            string result = "";
-
-            if (input.Length == 4) { result += "CORNER("; }
-            else if (input.Length == 6) { result += "LINE("; }
-            
-            foreach (int i in input.OrderDescending().Reverse())
-            {
-                result += i;
-                if (i != input.OrderDescending().Reverse().Last()) result += ", ";
-            }
-            result += ")";
-
-            return result;
-        }
-
-        /// <summary>
-        /// Disables non numeric numbers if the player is placing a bet on multiple numbers
-        /// </summary>
-        /// <param name="sender"> The button that is being pressed - this is to ensure we keep this button active so we can back out of the alternative betting mode</param>
         public void DisableNonNumericButtons(object sender, bool flag)
                 {
                     foreach (Button b in AllButtons)
@@ -848,9 +814,6 @@ namespace roulette
             return row;
         }
 
-        /// <summary>
-        /// function that cycles through the bets made and pays out if the bet has won
-        /// </summary>
         public void PayoutBets()
         {
             int winnings = 0;
@@ -956,56 +919,74 @@ namespace roulette
 
 
         }
-        
-        public string MakeBetHumanReadable(sbyte[] input)
-        {
-            string result = "";
 
-            //determine the kind of bet by the length
-            switch (input.Length)
-            {
-                case 2: result += "Split ("; break;
-                case 3: result += "Street ("; break;
-                case 4: result += "Corner ("; break;
-                case 6: result += "Line ("; break;
-            }
-            
-            foreach (sbyte b in input)
-            {
-                result += b.ToString();
-                if(b!= input.Last<sbyte>())
-                {
-                    result += ", ";
-                }
-            }
-
-            result += ")";
-            return result;    
-        }
+        //converts a single value bet in to it's human readable counterpart
         public string MakeBetHumanReadable(sbyte input)
         {
-            string result = "";
-            
-            switch (input)
+            return input switch
             {
-                case -1: result = "00";  break;
-                case <38: result = input.ToString(); break;
-                case 40: result = "Black"; break;
-                case 41: result = "Red"; break;
-                case 42: result = "Even"; break;
-                case 43: result = "Odd"; break;
-                case 44: result = "1 to 18"; break;
-                case 45: result = "19 to 36"; break;
-                case 46: result = "1st Column"; break;
-                case 47: result = "2nd Column"; break;
-                case 48: result = "3rd Column"; break;
-                case 49: result = "1st 12"; break;
-                case 50: result = "2nd 12"; break;
-                case 51: result = "3rd 12"; break;
-            }   
-            
-            return result;
-        
+                -1 => "00",
+                < 38 => input.ToString(),
+                40 => "Black",
+                41 => "Red",
+                42 => "Even",
+                43 => "Odd",
+                44 => "1 to 18",
+                45 => "19 to 36",
+                46 => "1st Column",
+                47 => "2nd Column",
+                48 => "3rd Column",
+                49 => "1st 12",
+                50 => "2nd 12",
+                51 => "3rd 12",
+                52=>"First Five",
+                _ => "Unknown"
+            };
+        }
+
+        //converts bets on multiple numbers in to a human readable bet
+        public string MakeBetHumanReadable(sbyte[] input)
+        {
+            //return an empty string if there is nothing in the array
+            if (input == null || input.Length == 0)
+                return string.Empty;
+
+            //determine the type of bet by the length of the array
+            string betType = input.Length switch
+            {
+                2 => "Split",
+                3 => "Street",
+                4 => "Corner",
+                6 => "Line",
+                _ => "Unknown"
+            };
+
+            string numbers = string.Join(", ", input.Select(b => b.ToString()));
+
+            return $"{betType} ({numbers})";
+        }
+
+        //converts strings from betting buttons to byte values 
+        public sbyte GetBetCode(string label)
+        {
+            return label switch
+            {
+                "00" => -1,
+                "BLACK" => 40,
+                "RED" => 41,
+                "EVEN" => 42,
+                "ODD" => 43,
+                "1 to 18" => 44,
+                "19 to 36" => 45,
+                "1st Column" => 46,
+                "2nd Column" => 47,
+                "3rd Column" => 48,
+                "1st 12" => 49,
+                "2nd 12" => 50,
+                "3rd 12" => 51,
+                "First Five" =>52,
+                _ => sbyte.TryParse(label, out var result) ? result : throw new ArgumentException($"Invalid bet label: {label}")
+            };
         }
 
     }
