@@ -239,14 +239,12 @@ namespace roulette
                     foreach (Button b in AllButtons)
                     {
                         // Always keep Split buttons enabled (to allow cancel)
-                        if (b.Content.ToString().Contains("Split")) continue;
+                        if (b.Content.ToString().Contains("Split") || (sbyte.TryParse(b.Content.ToString(), out sbyte r) && acceptableNumbers.Contains(r)) || (b.Content.ToString().Equals("00") && acceptableNumbers.Contains(-1))) continue;
 
                         // Disable the button by default
                         b.IsEnabled = false;
                         b.Background = Brushes.DarkGreen;
-                        // Enable only buttons that represent acceptable adjacent numbers
-                        if (sbyte.TryParse(b.Content.ToString(), out sbyte r) && acceptableNumbers.Contains(r))
-                            b.IsEnabled = true;
+                                          
                     }
                 }
                 else
@@ -263,6 +261,7 @@ namespace roulette
                     // Reset split bet flags and re-enable buttons
                     placingSplitBet = false;
                     waitingForSecondClick = false;
+                    EnableNumericButtons();
                     EnableNonNumericButtons();
                 }
             }
@@ -610,6 +609,20 @@ namespace roulette
             }
         }
 
+        public void EnableNumericButtons()
+        {
+            foreach(Button b in NumericButtons)
+            {
+                if (int.TryParse(b.Content.ToString(), out int r) && r > 0 )
+                {
+                    if (reds.Contains(r)) { b.Background = Brushes.Red; }
+                    else { b.Background = Brushes.Black;  }
+                    
+                }
+                    
+            }
+        }
+
         /// This method returns a string of the bets that have won separated by a comma eg. "21, RED, ODD...etc."
         public string CalculateWinningBets(int input)
         {
@@ -742,7 +755,16 @@ namespace roulette
             //if the number is 0 or 00
             if (number <= 0)
             {
-                acceptableNumbers.Append(1).Append(2).Append(3);
+                if (number == -1) 
+                {
+                    acceptableNumbers.AddRange(new int[] { 0, 3 });
+                }
+                else
+                {
+                    acceptableNumbers.AddRange(new int[] { -1, 1 });
+                }
+                    acceptableNumbers.Add(2);
+                return;
             }
 
             switch (DetermineRow(number))
